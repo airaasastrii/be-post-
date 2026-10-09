@@ -45,4 +45,5 @@ export const login = (req,res) => {
             token: `jwt-token-123 ${user.id} - ${Date.now()}`
         }
     });
-};
+}
+
