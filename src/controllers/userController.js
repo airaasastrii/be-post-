@@ -45,8 +45,8 @@ export const getUserById = async (req, res) => {
 try {
     const id = parseInt(req.params.id);
     // find = mencari id atau code lain
-    const user = await pool.query("SELECT id, name, is_active FROM users WHERE id= ?", [id]);
-    if(!user){
+    const [user] = await pool.query("SELECT id, name, is_active FROM users WHERE id= ?", [id]);
+    if(!user[0]){
         res.status(404).json({
             status: false,
             message: "User not found",
@@ -88,10 +88,12 @@ try {
 }
 };
 
-const[user] = await pool.query("UPDATE users SET name=?, email=?, password=? WHERE id=?", [name, email, password, id]);
-export const updateUser = (req, res) => {
+export const updateUser = async (req, res) => {
     const id = parseInt(req.params.id);
     const {name, email, password} = req.body;
+    const[user] = await pool.query
+    ("UPDATE users SET name=?, email=?, password=? WHERE id=?", 
+    [name, email, password, id]);
 
     const userIndex = USERS.find((u) => u.id === id);
     USERS[userIndex] = {
@@ -106,25 +108,42 @@ export const updateUser = (req, res) => {
         message: 'Update user success',
         data: USERS[userIndex]
     });
-    // name yg pertama biru itu punya users, kalo name yg di dalem itu dari PILOT (data yg di input di depan).
+    // name yg pertama biru itu punya users, kalo name yg di dalem itu dari PILOT (data yg di input di depan). PILOT cuma bisa di POST.
     // user mana dari index yang mau di ambil, user artinya data yg muncul.
     // find = mencari data atau id
 }
 
-export const deleteUser = (req, res) => {
+export const deleteUser = async (req, res) => {
+    try {
     const id = parseInt(req.params.id);
-    const userIndex = USERS.findIndex((u) => u.id === id);
 
-    if (userIndex === -1) {
+    const [user] = await pool.query ("UPDATE FROM users WHERE id=?", [id]);
+    if (!user) {
         return res.status(404).json({
             status: false,
-            message: "User no found",
+            message: "not found",
         });
     }
     
-    const deletedUser = USERS.splice(userIndex, 1)[0];
-     return res.status(200).json({
+        res.status(200).json({
             status: true,
-            message: "Delete user success",
-     });
+            message: "Delete issuccess",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: error.message,
+        });
+    }
+    
 };
+
+
+//     const deletedUser = USERS.splice(userIndex, 1)[0];
+//      return res.status(200).json({
+//             status: true,
+//             message: "Delete user success",
+//      });
+
+
+
